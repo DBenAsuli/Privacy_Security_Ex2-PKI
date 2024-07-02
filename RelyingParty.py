@@ -4,11 +4,11 @@
 
 from Entity import *
 
+
 class RelyingParty:
     def __init__(self, public_key, entity):
         self.public_key = public_key
         self.entity = entity
-
 
     def verify_signed_data(self, entity, data, signature):
         if not self.verify_certificate(entity.public_key, entity.certificate, entity.valid_from, entity.valid_to):
@@ -36,6 +36,9 @@ class RelyingParty:
             valid_to_dt = datetime.datetime.strptime(valid_to, '%Y-%m-%d %H:%M:%S')
             if valid_from_dt <= current_datetime <= valid_to_dt:
                 return True
-            return False
+            else:
+                return False
+
         except (ValueError, TypeError):
+            print("Verification failed")
             return False

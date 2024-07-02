@@ -15,9 +15,9 @@ class CA:
         self.key = RSA.generate(2048)
         self.public_key = self.key.publickey()
 
-    def sign_certificate(self, entity_public_key):
+    def sign_certificate(self, entity_public_key, hours_limit=1):
         valid_from = datetime.datetime.now()
-        valid_to = valid_from + datetime.timedelta(hours=10)
+        valid_to = valid_from + datetime.timedelta(hours=hours_limit)
         valid_from_str = valid_from.strftime('%Y-%m-%d %H:%M:%S')
         valid_to_str = valid_to.strftime('%Y-%m-%d %H:%M:%S')
         certificate_data = entity_public_key.export_key() + valid_from_str.encode('utf-8') + valid_to_str.encode(

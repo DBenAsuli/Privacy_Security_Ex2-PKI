@@ -13,8 +13,8 @@ class Entity:
         self.valid_from = None
         self.valid_to = None
 
-    def request_certificate(self, ca):
-        self.certificate, self.valid_from, self.valid_to = ca.sign_certificate(self.public_key)
+    def request_certificate(self, ca, hours_limit=1):
+        self.certificate, self.valid_from, self.valid_to = ca.sign_certificate(self.public_key, hours_limit=hours_limit)
 
     def sign_data(self, data):
         if not self.certificate:
