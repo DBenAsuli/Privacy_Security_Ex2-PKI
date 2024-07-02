@@ -13,7 +13,7 @@ def generate_random_string(length):
 
 
 if __name__ == '__main__':
-    num_of_tests = 100
+    num_of_tests = 500
     error = 0
 
     print("Starting test")
@@ -47,11 +47,11 @@ if __name__ == '__main__':
 
         if not is_verified and not time_expired and not sabotage_signature:
             error = 1
-            print("Verification for test " + str(i) + " failed")
+            print("\nVerification for test " + str(i) + " failed")
             break
         if is_verified and (time_expired or sabotage_signature):
             error = 1
-            print("Verification for test " + str(i) + " failed, " + "time_expired = " + str(
+            print("\nVerification for test " + str(i) + " failed, " + "time_expired = " + str(
                 time_expired) + ", sabotage_signature =" + str(sabotage_signature))
             break
 
@@ -69,12 +69,12 @@ if __name__ == '__main__':
         if not sabotage_data:
             if decrypted_data != data:
                 error = 1
-                print("Decryption for test " + str(i) + " failed")
+                print("\nDecryption for test " + str(i) + " failed")
                 break
         if sabotage_data:
             if decrypted_data == data:
                 error = 1
-                print("Decryption for test " + str(i) + " failed, after sabotagin data")
+                print("\nDecryption for test " + str(i) + " failed, after sabotagin data")
                 break
 
         become_ca = entity.request_cs_authority(ca=ca)
@@ -106,11 +106,11 @@ if __name__ == '__main__':
 
             if not is_verified and not time_expired and not sabotage_signature:
                 error = 1
-                print("Verification for test " + str(i) + " failed")
+                print("\nVerification for test " + str(i) + " failed")
                 break
             if is_verified and (time_expired or sabotage_signature):
                 error = 1
-                print("Verification for test " + str(i) + " failed, " + "time_expired = " + str(
+                print("\nVerification for test " + str(i) + " failed, " + "time_expired = " + str(
                     time_expired) + ", sabotage_signature =" + str(sabotage_signature))
                 break
 
@@ -124,13 +124,13 @@ if __name__ == '__main__':
 
             if not (entity2.certificate == False):
                 error = 1
-                print("Entity acted as CA without permission")
+                print("\nEntity acted as CA without permission for test " + str(i))
                 break
 
 
 
 
     if error == 0:
-        print("All tests PASSED")
+        print("\nAll tests PASSED")
     else:
-        print("Some test FAILED")
+        print("\nSome test FAILED")
