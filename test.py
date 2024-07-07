@@ -81,7 +81,17 @@ if __name__ == '__main__':
         else:
             encrypted_data = entity.encrypt_data("XXXX", recipient.public_key)
 
+
+        signature = recipient.sign_data(encrypted_data)
+
+        # Relying Party verifies the signed data
+        is_verified = relying_party.verify_signed_data(recipient, encrypted_data, signature)
         decrypted_data = relying_party.decrypt_data(encrypted_data, recipient.key)
+
+        if not is_verified:
+            error = 1
+            print("\nVerification for test " + str(i) + " failed")
+            break
 
         if not sabotage_data:
             if decrypted_data != data:
@@ -91,7 +101,7 @@ if __name__ == '__main__':
         if sabotage_data:
             if decrypted_data == data:
                 error = 1
-                print("\nDecryption for test " + str(i) + " failed, after sabotagin data")
+                print("\nDecryption for test " + str(i) + " failed, after sabotaging data")
                 break
 
         become_ca = entity.request_cs_authority(ca=ca)
