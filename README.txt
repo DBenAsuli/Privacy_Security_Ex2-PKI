@@ -3,9 +3,9 @@ Dvir Ben Asuli                                          318208816
 The Hebrew University of Jerusalem                      July 2024
 
 Structure:
-    1. CA.py- The Certificate Authorities  (CA) Class.
+    1. CA.py- The Certificate Authorities (CA) Class.
     2. Entity.py- The Entity Class.
-    3. RelyingParty.pt- The Relying Party Class.
+    3. RelyingParty.py- The Relying Party Class.
     4. main.py- Running flow or the mechanism.
     5. test.py- Automatic randomized test for different scenarios with the system,
 

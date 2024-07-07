@@ -2,12 +2,10 @@
 # Dvir Ben Asuli                                          318208816
 # The Hebrew University of Jerusalem                      July 2024
 
-import os
 import re
-import sys
 import string
-from io import StringIO
 from RelyingParty import *
+
 
 def generate_random_string(length):
     letters = string.ascii_letters + string.digits
@@ -16,10 +14,10 @@ def generate_random_string(length):
 
 
 if __name__ == '__main__':
-    num_of_tests = 500
+    num_of_tests = random.randint(0, 500)
     error = 0
 
-    print("Starting test")
+    print("Starting " + str(num_of_tests) + " tests:")
 
     for i in range(num_of_tests):
         ca = CA()
@@ -29,31 +27,27 @@ if __name__ == '__main__':
         sabotage_signature = random.randint(0, 1)
         sabotage_data = random.randint(0, 1)
         dont_request_certificate = random.randint(0, 1)
-        dont_request_certificate = 0
 
-        # Entity requests a certificate from the CA
-        if time_expired:
-            entity.request_certificate(ca=ca, hours_limit=0)
-        elif not dont_request_certificate:
-            entity.request_certificate(ca=ca)
+        if not dont_request_certificate:
+            # Entity requests a certificate from the CA
+            if time_expired:
+                entity.request_certificate(ca=ca, hours_limit=0)
+            else:
+                entity.request_certificate(ca=ca)
 
         # Entity signs some data
         data = generate_random_string(random.randint(1, 100))
 
         # We ask the entity to sign data despite noe having a certificate from CA
         if dont_request_certificate:
-            captured_output = StringIO()
-            sys.stdout = captured_output
-
-            # Call the function that prints something
-            retrieved_data = entity.sign_data(data)
-
-            # Get the printed output
-            printed_output = captured_output.getvalue()
-            sys.stdout = sys.__stdout__
-
-            # Check if the target regex pattern matches in the printed output
-            if not re.search(r'Entity does not have a valid certificate.*', printed_output):
+            try:
+                entity.sign_data(data)
+            except Exception as e:
+                if not re.search(r'Entity does not have a valid certificate.*', str(e)):
+                    error = 1
+                    print("\nVerification for test " + str(i) + " failed: Non-certified Entity signed data")
+                    break
+            else:
                 error = 1
                 print("\nVerification for test " + str(i) + " failed: Non-certified Entity signed data")
                 break
@@ -151,6 +145,6 @@ if __name__ == '__main__':
                 break
 
     if error == 0:
-        print("\nAll tests PASSED")
+        print("\nAll " + str(num_of_tests) + " tests PASSED")
     else:
         print("\nSome test FAILED")
