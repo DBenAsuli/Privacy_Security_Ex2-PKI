@@ -6,7 +6,7 @@ Structure:
     1. CA.py- The Certificate Authorities (CA) Class.
     2. Entity.py- The Entity Class.
     3. RelyingParty.py- The Relying Party Class.
-    4. main.py- Running flow or the mechanism.
+    4. main.py- Running flow for the mechanism.
     5. test.py- Automatic randomized test for different scenarios with the system,
 
 Please make sure to install the pycryptodome package beforehand.

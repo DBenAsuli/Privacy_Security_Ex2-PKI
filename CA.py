@@ -43,4 +43,3 @@ class CA:
             return forced_value
 
         return random.randint(0, 1)
-
