@@ -10,9 +10,14 @@ class RelyingParty:
         self.public_key = public_key
         self.entity = entity
 
+    # Once receiving signed data from entity, verify its authenticity
     def verify_signed_data(self, entity, data, signature):
+        # First verify the validity of the Entity's certificate
         if not self.verify_certificate(entity.public_key, entity.certificate, entity.valid_from, entity.valid_to):
             return False
+
+        # If it has a valid certificate,
+        # Check authenticity of the data signed by the entity
         data_hash = SHA256.new(data.encode('utf-8'))
         signature = base64.b64decode(signature.encode('utf-8'))
         try:
@@ -21,16 +26,22 @@ class RelyingParty:
         except (ValueError, TypeError):
             return False
 
+    # The party decrypts the data for verification of Data Integrity.
     def decrypt_data(self, encrypted_data, private_key):
         cipher = PKCS1_OAEP.new(private_key)
         decrypted_data = cipher.decrypt(base64.b64decode(encrypted_data.encode('utf-8')))
         return decrypted_data.decode('utf-8')
 
+    # Verify the validity of the Entity's certificate
     def verify_certificate(self, entity_public_key, signature, valid_from, valid_to):
+        # Concatenate the key, the data and the valid timestamp to the signed string
         certificate_data = entity_public_key.export_key() + valid_from.encode('utf-8') + valid_to.encode('utf-8')
         certificate_hash = SHA256.new(certificate_data)
         try:
+            # Verify the certificate itself based on the string's hash
             pkcs1_15.new(self.public_key).verify(certificate_hash, signature)
+
+            # Verify timestamp validity
             current_datetime = datetime.datetime.now()
             valid_from_dt = datetime.datetime.strptime(valid_from, '%Y-%m-%d %H:%M:%S')
             valid_to_dt = datetime.datetime.strptime(valid_to, '%Y-%m-%d %H:%M:%S')
@@ -40,5 +51,6 @@ class RelyingParty:
                 return False
 
         except (ValueError, TypeError):
+            # Some error occured during verification, the certificate is not valid
             print("Verification failed")
             return False
