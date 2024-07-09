@@ -7,6 +7,8 @@ from Entity import *
 
 class RelyingParty:
     def __init__(self):
+        self.key = RSA.generate(2048)
+        self.public_key = self.key.publickey()
         pass
 
     # Once receiving signed data from entity, verify its authenticity
@@ -51,7 +53,7 @@ class RelyingParty:
             return False
 
     # The party decrypts the data for verification of Data Integrity.
-    def decrypt_data(self, encrypted_data, private_key):
-        cipher = PKCS1_OAEP.new(private_key)
+    def decrypt_data(self, encrypted_data):
+        cipher = PKCS1_OAEP.new(self.key)
         decrypted_data = cipher.decrypt(base64.b64decode(encrypted_data.encode('utf-8')))
         return decrypted_data.decode('utf-8')

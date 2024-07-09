@@ -78,16 +78,16 @@ if __name__ == '__main__':
         recipient.request_certificate(ca=ca)
 
         if not sabotage_data:
-            encrypted_data = entity.encrypt_data(data=data, recipient_public_key=recipient.public_key)
+            encrypted_data = entity.encrypt_data(data=data, recipient_public_key=relying_party.public_key)
         else:
-            encrypted_data = entity.encrypt_data(data="XXXX", recipient_public_key=recipient.public_key)
+            encrypted_data = entity.encrypt_data(data="XXXX", recipient_public_key=relying_party.public_key)
 
         signature = recipient.sign_data(data=encrypted_data)
 
         # Relying Party verifies the signed data
         is_verified = relying_party.verify_signed_data(entity=recipient, ca=ca, data=encrypted_data,
                                                        signature=signature)
-        decrypted_data = relying_party.decrypt_data(encrypted_data=encrypted_data, private_key=recipient.key)
+        decrypted_data = relying_party.decrypt_data(encrypted_data=encrypted_data)
 
         if not is_verified:
             error = 1

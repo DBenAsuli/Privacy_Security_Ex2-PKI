@@ -14,12 +14,12 @@ if __name__ == '__main__':
 
     # Entity signs some data
     data = generate_random_string(random.randint(1, 100))
-    encrypted_data = entity.encrypt_data(data=data, recipient_public_key=entity.public_key)
+    encrypted_data = entity.encrypt_data(data=data, recipient_public_key=relying_party.public_key)
     signature = entity.sign_data(data=encrypted_data)
 
     # Relying Party verifies the signed data
     is_verified = relying_party.verify_signed_data(entity=entity, ca=ca, data=encrypted_data, signature=signature)
-    decrypted_data = relying_party.decrypt_data(encrypted_data=encrypted_data, private_key=entity.key)
+    decrypted_data = relying_party.decrypt_data(encrypted_data=encrypted_data)
 
     if not is_verified:
         print("\nAuthenticity verification failed")
