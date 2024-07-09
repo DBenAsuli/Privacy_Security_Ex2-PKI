@@ -4,6 +4,7 @@
 
 import re
 import string
+
 from RelyingParty import *
 
 
@@ -22,7 +23,7 @@ if __name__ == '__main__':
     for i in range(num_of_tests):
         ca = CA()
         entity = Entity()
-        relying_party = RelyingParty(public_key=ca.public_key, entity=entity)
+        relying_party = RelyingParty()
         time_expired = random.randint(0, 1)
         sabotage_signature = random.randint(0, 1)
         sabotage_data = random.randint(0, 1)
@@ -55,12 +56,12 @@ if __name__ == '__main__':
             continue
 
         if not sabotage_signature:
-            signature = entity.sign_data(data)
+            signature = entity.sign_data(data=data)
         else:
             signature = "XOXO"
 
         # Relying Party verifies the signed data
-        is_verified = relying_party.verify_signed_data(entity, data, signature)
+        is_verified = relying_party.verify_signed_data(entity=entity, ca=ca, data=data, signature=signature)
 
         if not is_verified and not time_expired and not sabotage_signature:
             error = 1
@@ -77,16 +78,16 @@ if __name__ == '__main__':
         recipient.request_certificate(ca=ca)
 
         if not sabotage_data:
-            encrypted_data = entity.encrypt_data(data, recipient.public_key)
+            encrypted_data = entity.encrypt_data(data=data, recipient_public_key=recipient.public_key)
         else:
-            encrypted_data = entity.encrypt_data("XXXX", recipient.public_key)
+            encrypted_data = entity.encrypt_data(data="XXXX", recipient_public_key=recipient.public_key)
 
-
-        signature = recipient.sign_data(encrypted_data)
+        signature = recipient.sign_data(data=encrypted_data)
 
         # Relying Party verifies the signed data
-        is_verified = relying_party.verify_signed_data(recipient, encrypted_data, signature)
-        decrypted_data = relying_party.decrypt_data(encrypted_data, recipient.key)
+        is_verified = relying_party.verify_signed_data(entity=recipient, ca=ca, data=encrypted_data,
+                                                       signature=signature)
+        decrypted_data = relying_party.decrypt_data(encrypted_data=encrypted_data, private_key=recipient.key)
 
         if not is_verified:
             error = 1
@@ -109,7 +110,7 @@ if __name__ == '__main__':
         if become_ca:
             entity2 = Entity()
 
-            relying_party = RelyingParty(public_key=entity.public_key, entity=entity2)
+            relying_party = RelyingParty()
             time_expired = random.randint(0, 1)
             sabotage_signature = random.randint(0, 1)
             sabotage_data = random.randint(0, 1)
@@ -129,7 +130,7 @@ if __name__ == '__main__':
                 signature = "XOXO"
 
             # Relying Party verifies the signed data
-            is_verified = relying_party.verify_signed_data(entity2, data, signature)
+            is_verified = relying_party.verify_signed_data(entity=entity2, ca=entity, data=data, signature=signature)
 
             if not is_verified and not time_expired and not sabotage_signature:
                 error = 1
@@ -146,13 +147,57 @@ if __name__ == '__main__':
 
             # New Entity trying to request certificate from old Entity,
             # Which is not a CA
-            relying_party = RelyingParty(public_key=entity.public_key, entity=entity2)
+            relying_party = RelyingParty()
             entity2.request_certificate(ca=entity)
 
             if not (entity2.certificate == False):
                 error = 1
                 print("\nEntity acted as CA without permission for test " + str(i))
                 break
+
+        # Testing mulitple entities and CAs on a single relying party
+
+        relying_party = RelyingParty()
+
+        ca1 = CA()
+        entity1 = Entity()
+        entity2 = Entity()
+        ca2 = CA()
+        entity3 = Entity()
+
+        entity1.request_certificate(ca=ca1)
+        entity2.request_certificate(ca=ca1)
+        entity3.request_certificate(ca=ca2)
+
+        # Entities signs some data
+        data1 = generate_random_string(random.randint(1, 100))
+        signature1 = entity1.sign_data(data1)
+        data2 = generate_random_string(random.randint(1, 100))
+        signature2 = entity2.sign_data(data2)
+        data3 = generate_random_string(random.randint(1, 100))
+        signature3 = entity3.sign_data(data3)
+
+        is_verified1 = relying_party.verify_signed_data(entity=entity1, ca=ca1, data=data1, signature=signature1)
+        is_verified2 = relying_party.verify_signed_data(entity=entity2, ca=ca1, data=data2, signature=signature2)
+        is_verified3 = relying_party.verify_signed_data(entity=entity3, ca=ca2, data=data3, signature=signature3)
+
+        if not is_verified1:
+            error = 1
+            print("\nVerification for test " + str(i) + " failed")
+            print("\nFailed to verify first entity inside the Relying Party")
+            break
+
+        if not is_verified2:
+            error = 1
+            print("\nVerification for test " + str(i) + " failed")
+            print("\nFailed to verify second entity inside the Relying Party")
+            break
+
+        if not is_verified3:
+            error = 1
+            print("\nVerification for test " + str(i) + " failed")
+            print("\nFailed to verify third entity (from different CA) inside the Relying Party")
+            break
 
     if error == 0:
         print("\nAll " + str(num_of_tests) + " tests PASSED")

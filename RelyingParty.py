@@ -6,14 +6,15 @@ from Entity import *
 
 
 class RelyingParty:
-    def __init__(self, public_key, entity):
-        self.public_key = public_key
-        self.entity = entity
+    def __init__(self):
+        pass
 
     # Once receiving signed data from entity, verify its authenticity
-    def verify_signed_data(self, entity, data, signature):
+    def verify_signed_data(self, entity, ca, data, signature):
         # First verify the validity of the Entity's certificate
-        if not self.verify_certificate(entity.public_key, entity.certificate, entity.valid_from, entity.valid_to):
+        if not self.verify_certificate(entity_public_key=entity.public_key, ca_public_key=ca.public_key,
+                                       signature=entity.certificate, valid_from=entity.valid_from,
+                                       valid_to=entity.valid_to):
             return False
 
         # If it has a valid certificate,
@@ -26,20 +27,14 @@ class RelyingParty:
         except (ValueError, TypeError):
             return False
 
-    # The party decrypts the data for verification of Data Integrity.
-    def decrypt_data(self, encrypted_data, private_key):
-        cipher = PKCS1_OAEP.new(private_key)
-        decrypted_data = cipher.decrypt(base64.b64decode(encrypted_data.encode('utf-8')))
-        return decrypted_data.decode('utf-8')
-
     # Verify the validity of the Entity's certificate
-    def verify_certificate(self, entity_public_key, signature, valid_from, valid_to):
+    def verify_certificate(self, entity_public_key, ca_public_key, signature, valid_from, valid_to):
         # Concatenate the key, the data and the valid timestamp to the signed string
         certificate_data = entity_public_key.export_key() + valid_from.encode('utf-8') + valid_to.encode('utf-8')
         certificate_hash = SHA256.new(certificate_data)
         try:
             # Verify the certificate itself based on the string's hash
-            pkcs1_15.new(self.public_key).verify(certificate_hash, signature)
+            pkcs1_15.new(ca_public_key).verify(certificate_hash, signature)
 
             # Verify timestamp validity
             current_datetime = datetime.datetime.now()
@@ -54,3 +49,9 @@ class RelyingParty:
             # Some error occured during verification, the certificate is not valid
             print("Verification failed")
             return False
+
+    # The party decrypts the data for verification of Data Integrity.
+    def decrypt_data(self, encrypted_data, private_key):
+        cipher = PKCS1_OAEP.new(private_key)
+        decrypted_data = cipher.decrypt(base64.b64decode(encrypted_data.encode('utf-8')))
+        return decrypted_data.decode('utf-8')

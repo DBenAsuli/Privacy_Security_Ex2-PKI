@@ -22,30 +22,6 @@ class Entity:
         self.certificate, self.valid_from, self.valid_to = ca.sign_certificate(entity_public_key=self.public_key,
                                                                                hours_limit=hours_limit, ca=ca)
 
-    # Requesting an authority from CA to become its own CA.
-    # Normally, the decision is done randomly.
-    # If 'force_value' flag is passed, the request returns the 'forced_value'.
-    def request_cs_authority(self, ca, force_value=0, forced_value=0):
-        self.is_ca = ca.grant_request_ca_authority(force_value, forced_value)
-        return self.is_ca
-
-    # The entity signs the data for authenticity
-    def sign_data(self, data):
-        # If it doesnt have a proper certificate, it will not be able to sign the data.
-        if not self.certificate:
-            raise ValueError("Entity does not have a valid certificate.")
-
-        # If it has a certificate, it uses it's provate key to sign the data
-        data_hash = SHA256.new(data.encode('utf-8'))
-        signature = pkcs1_15.new(self.key).sign(data_hash)
-        return base64.b64encode(signature).decode('utf-8')
-
-    # The entity encrypts the data for verification of Data Integrity.
-    def encrypt_data(self, data, recipient_public_key):
-        cipher = PKCS1_OAEP.new(recipient_public_key)
-        encrypted_data = cipher.encrypt(data.encode('utf-8'))
-        return base64.b64encode(encrypted_data).decode('utf-8')
-
     # If the Entity was made a CA, it can sign a certificate by itself.
     # Else, this function returns nothing ('False' x3)
     def sign_certificate(self, entity_public_key, hours_limit=1, ca=None):
@@ -67,3 +43,27 @@ class Entity:
         else:
             # Entity doesn't have authority to sign
             return False, False, False
+
+    # The entity signs the data for authenticity
+    def sign_data(self, data):
+        # If it doesnt have a proper certificate, it will not be able to sign the data.
+        if not self.certificate:
+            raise ValueError("Entity does not have a valid certificate.")
+
+        # If it has a certificate, it uses it's provate key to sign the data
+        data_hash = SHA256.new(data.encode('utf-8'))
+        signature = pkcs1_15.new(self.key).sign(data_hash)
+        return base64.b64encode(signature).decode('utf-8')
+
+    # Requesting an authority from CA to become its own CA.
+    # Normally, the decision is done randomly.
+    # If 'force_value' flag is passed, the request returns the 'forced_value'.
+    def request_cs_authority(self, ca, force_value=0, forced_value=0):
+        self.is_ca = ca.grant_request_ca_authority(force_value, forced_value)
+        return self.is_ca
+
+    # The entity encrypts the data for verification of Data Integrity.
+    def encrypt_data(self, data, recipient_public_key):
+        cipher = PKCS1_OAEP.new(recipient_public_key)
+        encrypted_data = cipher.encrypt(data.encode('utf-8'))
+        return base64.b64encode(encrypted_data).decode('utf-8')
