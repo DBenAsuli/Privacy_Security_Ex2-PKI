@@ -52,6 +52,11 @@ if __name__ == '__main__':
     is_verified2 = relying_party.verify_signed_data(entity=entity2, ca=ca1, data=data2, signature=signature2)
     is_verified3 = relying_party.verify_signed_data(entity=entity3, ca=ca2, data=data3, signature=signature3)
 
+    # Trying to use a different CA for the same entity
+    entity1.request_certificate(ca=ca2)
+    signature4 = entity1.sign_data(data1)
+    is_verified4 = relying_party.verify_signed_data(entity=entity1, ca=ca2, data=data1, signature=signature4)
+
     if not is_verified1:
         error = 1
         print("\nVerification for test " + str(i) + " failed")
@@ -64,5 +69,9 @@ if __name__ == '__main__':
         error = 1
         print("\nVerification for test " + str(i) + " failed")
         print("\nFailed to verify third entity (from different CA) inside the Relying Party")
+    elif not is_verified4:
+        error = 1
+        print("\nVerification for test " + str(i) + " failed")
+        print("\nFailed to verify first entity with different CA inside the Relying Party")
     else:
         print("SUCCESS!")
