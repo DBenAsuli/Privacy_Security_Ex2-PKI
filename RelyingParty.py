@@ -4,7 +4,6 @@
 
 from Entity import *
 
-
 class RelyingParty:
     def __init__(self):
         self.key = RSA.generate(2048)

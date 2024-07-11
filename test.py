@@ -134,6 +134,20 @@ if __name__ == '__main__':
                     time_expired) + ", sabotage_signature =" + str(sabotage_signature))
                 break
 
+            # New Entity trying to request CA Authorities from 2nd Entity,
+            # Which is not a CA
+            entity3 = Entity()
+            entity4 = Entity()
+            relying_party = RelyingParty()
+
+            entity3.request_cs_authority(ca=entity2)
+            entity4.request_certificate(ca=entity3)
+
+            if not (entity4.certificate == False):
+                error = 1
+                print("\nEntity acted as CA without permission for test " + str(i))
+                break
+
         else:
             entity2 = Entity()
 

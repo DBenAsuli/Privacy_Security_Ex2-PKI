@@ -2,8 +2,9 @@
 # Dvir Ben Asuli                                          318208816
 # The Hebrew University of Jerusalem                      July 2024
 
+import base64
 from CA import *
-
+from Crypto.Cipher import PKCS1_OAEP
 
 class Entity:
     def __init__(self, name=None):
