@@ -28,7 +28,8 @@ if __name__ == '__main__':
     elif decrypted_data != data:
         print("\nData Integrity verification failed")
 
-    relying_party.request_certificate_revokation(ca=ca, entity_name=entity.name, signature=entity.certificate)
+    relying_party.request_certificate_revokation(ca=ca, entity_name=entity.get_name(),
+                                                 signature=entity.get_certificate())
     is_verified = relying_party.verify_signed_data(entity=entity, ca=ca, data=encrypted_data, signature=signature)
 
     if is_verified:

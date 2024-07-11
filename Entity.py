@@ -6,6 +6,7 @@ import base64
 from CA import *
 from Crypto.Cipher import PKCS1_OAEP
 
+
 class Entity:
     def __init__(self, name=None):
         if name == None:
@@ -54,7 +55,7 @@ class Entity:
     # If the Entity was made a CA, it can sign a certificate by itself.
     # Else, this function returns nothing ('False' x3)
     def sign_certificate(self, entity_public_key, entity_name, hours_limit=1, ca=None):
-        if (ca.is_ca):
+        if (ca.get_is_ca()):
             # Calculates validity period
             valid_from = datetime.datetime.now()
             valid_to = valid_from + datetime.timedelta(hours=hours_limit)
@@ -108,3 +109,21 @@ class Entity:
             if entity_name in self.certificates_dict:
                 if signature in self.certificates_dict[entity_name]:
                     self.certificates_dict[entity_name].remove(signature)
+
+    def get_name(self):
+        return self.name
+
+    def get_public_key(self):
+        return self.public_key
+
+    def get_certificate(self):
+        return self.certificate
+
+    def get_valid_from(self):
+        return self.valid_from
+
+    def get_valid_to(self):
+        return self.valid_to
+
+    def get_is_ca(self):
+        return self.is_ca

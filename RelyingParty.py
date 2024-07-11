@@ -4,6 +4,7 @@
 
 from Entity import *
 
+
 class RelyingParty:
     def __init__(self):
         self.key = RSA.generate(2048)
@@ -13,10 +14,9 @@ class RelyingParty:
     # Once receiving signed data from entity, verify its authenticity
     def verify_signed_data(self, entity, ca, data, signature):
         # First verify the validity of the Entity's certificate
-        if not self.verify_certificate(entity_public_key=entity.public_key, ca_public_key=ca.public_key,
-                                       entity_name=entity.name, ca_name=ca.name, ca=ca,
-                                       signature=entity.certificate, valid_from=entity.valid_from,
-                                       valid_to=entity.valid_to):
+        if not self.verify_certificate(entity_public_key=entity.get_public_key(), entity_name=entity.get_name(), ca=ca,
+                                       signature=entity.get_certificate(), valid_from=entity.get_valid_from(),
+                                       valid_to=entity.get_valid_to()):
             return False
 
         # If it has a valid certificate,
@@ -24,13 +24,13 @@ class RelyingParty:
         data_hash = SHA256.new(data.encode('utf-8'))
         signature = base64.b64decode(signature.encode('utf-8'))
         try:
-            pkcs1_15.new(entity.public_key).verify(data_hash, signature)
+            pkcs1_15.new(entity.get_public_key()).verify(data_hash, signature)
             return True
         except (ValueError, TypeError):
             return False
 
     # Verify the validity of the Entity's certificate
-    def verify_certificate(self, entity_public_key, ca_public_key, ca_name, ca, entity_name, signature, valid_from,
+    def verify_certificate(self, entity_public_key, entity_name, ca, signature, valid_from,
                            valid_to):
 
         # Verify the signature was not revoked by CA
@@ -38,12 +38,12 @@ class RelyingParty:
             return False
 
         # Concatenate the key, the data and the valid timestamp to the signed string
-        certificate_data = ca_name.encode('utf-8') + entity_name.encode(
+        certificate_data = ca.get_name().encode('utf-8') + entity_name.encode(
             'utf-8') + entity_public_key.export_key() + valid_from.encode('utf-8') + valid_to.encode('utf-8')
         certificate_hash = SHA256.new(certificate_data)
         try:
             # Verify the certificate itself based on the string's hash
-            pkcs1_15.new(ca_public_key).verify(certificate_hash, signature)
+            pkcs1_15.new(ca.get_public_key()).verify(certificate_hash, signature)
 
             # Verify timestamp validity
             current_datetime = datetime.datetime.now()
@@ -67,3 +67,6 @@ class RelyingParty:
 
     def request_certificate_revokation(self, ca, entity_name, signature):
         ca.revoke_certificate(entity_name=entity_name, signature=signature)
+
+    def get_public_key(self):
+        return self.public_key

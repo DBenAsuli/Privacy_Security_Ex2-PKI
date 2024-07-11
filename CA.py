@@ -2,9 +2,10 @@
 # Dvir Ben Asuli                                          318208816
 # The Hebrew University of Jerusalem                      July 2024
 
-import datetime
 import random
 import string
+import datetime
+
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import pkcs1_15
@@ -75,3 +76,12 @@ class CA:
         if entity_name in self.certificates_dict:
             if signature in self.certificates_dict[entity_name]:
                 self.certificates_dict[entity_name].remove(signature)
+
+    def get_name(self):
+        return self.name
+
+    def get_public_key(self):
+        return self.public_key
+
+    def get_is_ca(self):
+        return self.is_ca
