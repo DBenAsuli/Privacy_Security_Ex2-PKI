@@ -2,7 +2,7 @@
 # Dvir Ben Asuli                                          318208816
 # The Hebrew University of Jerusalem                      July 2024
 
-from test import *
+from RelyingParty import *
 
 if __name__ == '__main__':
     ca = CA()
@@ -59,19 +59,19 @@ if __name__ == '__main__':
 
     if not is_verified1:
         error = 1
-        print("\nVerification for test " + str(i) + " failed")
+        print("\nAuthenticity verification failed")
         print("\nFailed to verify first entity inside the Relying Party")
     elif not is_verified2:
         error = 1
-        print("\nVerification for test " + str(i) + " failed")
+        print("\nAuthenticity verification failed")
         print("\nFailed to verify second entity inside the Relying Party")
     elif not is_verified3:
         error = 1
-        print("\nVerification for test " + str(i) + " failed")
+        print("\nAuthenticity verification failed")
         print("\nFailed to verify third entity (from different CA) inside the Relying Party")
     elif not is_verified4:
         error = 1
-        print("\nVerification for test " + str(i) + " failed")
+        print("\nAuthenticity verification failed")
         print("\nFailed to verify first entity with different CA inside the Relying Party")
     else:
         print("SUCCESS!")

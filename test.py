@@ -3,16 +3,8 @@
 # The Hebrew University of Jerusalem                      July 2024
 
 import re
-import string
 
 from RelyingParty import *
-
-
-def generate_random_string(length):
-    letters = string.ascii_letters + string.digits
-    result_str = ''.join(random.choice(letters) for _ in range(length))
-    return result_str
-
 
 if __name__ == '__main__':
     num_of_tests = random.randint(0, 500)
