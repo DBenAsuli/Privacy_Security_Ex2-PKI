@@ -20,6 +20,7 @@ if __name__ == '__main__':
         sabotage_signature = random.randint(0, 1)
         sabotage_data = random.randint(0, 1)
         dont_request_certificate = random.randint(0, 1)
+        revoke_certificate = random.randint(0, 1)
 
         if not dont_request_certificate:
             # Entity requests a certificate from the CA
@@ -159,6 +160,17 @@ if __name__ == '__main__':
             if not (entity2.certificate == False):
                 error = 1
                 print("\nEntity acted as CA without permission for test " + str(i))
+                break
+
+        if revoke_certificate:
+            relying_party.request_certificate_revokation(ca=ca, entity_name=entity.name, signature=entity.certificate)
+            is_verified = relying_party.verify_signed_data(entity=entity, ca=ca, data=encrypted_data,
+                                                           signature=signature)
+
+            if is_verified:
+                error = 1
+                print("\nVerification for test " + str(i) + " failed")
+                print("\nData was verified despite certificate was revoked")
                 break
 
         # Testing mulitple entities and CAs on a single relying party

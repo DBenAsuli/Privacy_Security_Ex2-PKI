@@ -9,13 +9,14 @@ from Crypto.Cipher import PKCS1_OAEP
 class Entity:
     def __init__(self, name=None):
         if name == None:
-            self.name = generate_random_string(4)
+            self.name = generate_random_string(10)
         self.key = RSA.generate(2048)
         self.public_key = self.key.publickey()
         self.certificate = None
         self.valid_from = None
         self.valid_to = None
         self.is_ca = 0
+        self.certificates_dict = {}
 
     # Requesting a certificate from CA.
     # The user can specify the validity period of the certificate, default is 1 hour.
@@ -68,6 +69,13 @@ class Entity:
             # Creates signature
             certificate_hash = SHA256.new(certificate_data)
             signature = pkcs1_15.new(self.key).sign(certificate_hash)
+
+            # Add signature to dictionary of valid certificates
+            if entity_name not in self.certificates_dict.keys():
+                self.certificates_dict[entity_name] = []
+
+            self.certificates_dict[entity_name].append(signature)
+
             return signature, valid_from_str, valid_to_str
         else:
             # Entity doesn't have authority to sign
@@ -83,3 +91,20 @@ class Entity:
             return forced_value
 
         return random.randint(0, 1)
+
+    # Verify the signature was not revoked by CA and still considered valid
+    def verify_signature_validity(self, entity_name, signature):
+        if (self.is_ca):
+            if entity_name in self.certificates_dict:
+                if signature in self.certificates_dict[entity_name]:
+                    return True
+
+        return False
+
+    # Revoke a certificate granted to a given entity
+    # by removing it from dictionary
+    def revoke_certificate(self, entity_name, signature):
+        if (self.is_ca):
+            if entity_name in self.certificates_dict:
+                if signature in self.certificates_dict[entity_name]:
+                    self.certificates_dict[entity_name].remove(signature)

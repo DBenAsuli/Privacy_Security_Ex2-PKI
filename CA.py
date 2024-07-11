@@ -24,6 +24,7 @@ class CA:
         self.key = RSA.generate(2048)
         self.public_key = self.key.publickey()
         self.is_ca = 1
+        self.certificates_dict = {}
 
     # Request from CA to sign the certificate using the entity's public key
     # Calculated a timestamp that makes the signature valid for 'hours_limit' hours.
@@ -42,7 +43,22 @@ class CA:
         # Creates signature
         certificate_hash = SHA256.new(certificate_data)
         signature = pkcs1_15.new(self.key).sign(certificate_hash)
+
+        # Add signature to dictionary of valid certificates
+        if entity_name not in self.certificates_dict.keys():
+            self.certificates_dict[entity_name] = []
+
+        self.certificates_dict[entity_name].append(signature)
+
         return signature, valid_from_str, valid_to_str
+
+    # Verify the signature was not revoked by CA and still considered valid
+    def verify_signature_validity(self, entity_name, signature):
+        if entity_name in self.certificates_dict:
+            if signature in self.certificates_dict[entity_name]:
+                return True
+
+        return False
 
     # An entity requests the CA to make it its own CA.
     # Normally, the decision is done randomly.
@@ -52,3 +68,10 @@ class CA:
             return forced_value
 
         return random.randint(0, 1)
+
+    # Revoke a certificate granted to a given entity
+    # by removing it from dictionary
+    def revoke_certificate(self, entity_name, signature):
+        if entity_name in self.certificates_dict:
+            if signature in self.certificates_dict[entity_name]:
+                self.certificates_dict[entity_name].remove(signature)
